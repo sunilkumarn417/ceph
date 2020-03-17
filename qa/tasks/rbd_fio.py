@@ -52,12 +52,14 @@ or
         client_config = config['all']
     clients = ctx.cluster.only(teuthology.is_type('client'))
     rbd_test_dir = teuthology.get_testdir(ctx) + "/rbd_fio_test"
+    log.info("task config : %s" % config)
     for remote,role in clients.remotes.iteritems():
         if 'client_config' in locals():
            with parallel() as p:
                p.spawn(run_fio, remote, client_config, rbd_test_dir)
         else:
            for client_config in config:
+	      log.info("client config : %s" % client_config)
               if client_config in role:
                  with parallel() as p:
                      p.spawn(run_fio, remote, config[client_config], rbd_test_dir)
@@ -93,6 +95,7 @@ def run_fio(remote, config, rbd_test_dir):
     get the fio from github, generate binary, and use it to run on
     the generated fio config file
     """
+    log.info("FIO config : %s" % config)
     fio_config=NamedTemporaryFile(prefix='fio_rbd_', dir='/tmp/', delete=False)
     fio_config.write('[global]\n')
     if config.get('io-engine'):
